@@ -17,6 +17,8 @@ namespace osu.Game.Rulesets.Taiko.Objects
 
         public Bindable<HitType> TypeBindable => type.Bindable;
 
+        public int OffTrack = 0;
+
         /// <summary>
         /// The <see cref="HitType"/> that actuates this <see cref="Hit"/>.
         /// </summary>

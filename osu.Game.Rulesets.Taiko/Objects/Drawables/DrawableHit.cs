@@ -55,13 +55,14 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 
         protected override void OnApply()
         {
-            //TODO 1 : only enable this when some mod is toggled, otherwise just set offTrack to 0
-            //TODO 2 : somehow get offTrack from the hitobject to make sure it is the same for each plays ?
-            offTrack = (Random.Shared.Next() % 3) - 1;
-
             type.BindTo(HitObject.TypeBindable);
             // this doesn't need to be run inline as RecreatePieces is called by the base call below.
             type.BindValueChanged(_ => Scheduler.AddOnce(RecreatePieces));
+
+            offTrack = HitObject.OffTrack;
+
+            // Make sure the hit is visible outside the track
+            if (offTrack != 0) ProxyContent();
 
             base.OnApply();
         }
@@ -104,9 +105,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             if (offTrack != 0)
             {
                 this.MoveToY((-X * offTrack) / 3f);
-
-                //TODO : do this where the notes are initialized instead of doing it each frames
-                ProxyContent();
             }
         }
 
@@ -171,7 +169,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 case ArmedState.Idle:
                     validActionPressed = false;
 
-                    UnproxyContent();
+                    // If the hits come from outside the track we want to keep them visible
+                    if (offTrack == 0) UnproxyContent();
                     break;
 
                 case ArmedState.Miss:
