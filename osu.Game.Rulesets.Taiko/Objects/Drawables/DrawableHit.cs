@@ -40,6 +40,8 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 
         private readonly Bindable<HitType> type = new Bindable<HitType>();
 
+        private int offTrack = 0;
+
         public DrawableHit()
             : this(null)
         {
@@ -53,6 +55,10 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 
         protected override void OnApply()
         {
+            //TODO 1 : only enable this when some mod is toggled, otherwise just set offTrack to 0
+            //TODO 2 : somehow get offTrack from the hitobject to make sure it is the same for each plays ?
+            offTrack = (Random.Shared.Next() % 3) - 1;
+
             type.BindTo(HitObject.TypeBindable);
             // this doesn't need to be run inline as RecreatePieces is called by the base call below.
             type.BindValueChanged(_ => Scheduler.AddOnce(RecreatePieces));
@@ -88,6 +94,20 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                 HitObject.Type == HitType.Centre
                     ? new[] { TaikoAction.LeftCentre, TaikoAction.RightCentre }
                     : new[] { TaikoAction.LeftRim, TaikoAction.RightRim };
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            //TODO : find a better place/way to do this ? Overriding the drawable's Update method just to do that is weird
+            if (offTrack != 0)
+            {
+                this.MoveToY((-X * offTrack) / 3f);
+
+                //TODO : do this where the notes are initialized instead of doing it each frames
+                ProxyContent();
+            }
         }
 
         protected override SkinnableDrawable CreateMainPiece() => HitObject.Type == HitType.Centre
@@ -175,6 +195,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                         .MoveToY(gravity_travel_height * 2, gravity_time * 2, Easing.In);
 
                     this.FadeOut(800);
+                    offTrack = 0;
                     break;
             }
         }
