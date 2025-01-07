@@ -102,9 +102,9 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
             base.Update();
 
             //TODO : find a better place/way to do this ? Overriding the drawable's Update method just to do that is weird
-            if (offTrack != 0)
+            if (offTrack != 0 && !Judged)
             {
-                this.MoveToY((-X * offTrack) / 3f);
+                this.MoveToY(X > 0 ? -X * offTrack / 3f : 0f);
             }
         }
 
@@ -194,7 +194,6 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
                         .MoveToY(gravity_travel_height * 2, gravity_time * 2, Easing.In);
 
                     this.FadeOut(800);
-                    offTrack = 0;
                     break;
             }
         }
