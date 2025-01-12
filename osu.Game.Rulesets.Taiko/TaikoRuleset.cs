@@ -168,7 +168,8 @@ namespace osu.Game.Rulesets.Taiko
                         new TaikoModMuted(),
                         new ModAdaptiveSpeed(),
                         new TaikoModFlyIn(),
-                        new TaikoModBarrelRoll()
+                        new TaikoModBarrelRoll(),
+                        new TaikoModSequential()
                     };
 
                 case ModType.System:
