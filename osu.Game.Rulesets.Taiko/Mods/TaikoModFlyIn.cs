@@ -18,7 +18,7 @@ namespace osu.Game.Rulesets.Taiko.Mods
     {
         public override string Name => "Fly In";
 
-        public override string Acronym => "FI";
+        public override string Acronym => "FLY";
 
         public override double ScoreMultiplier => 1;
 
@@ -29,17 +29,39 @@ namespace osu.Game.Rulesets.Taiko.Mods
         [SettingSource("Seed", "Use a custom seed instead of a random one", SettingControlType = typeof(SettingsNumberBox))]
         public Bindable<int?> Seed { get; } = new Bindable<int?>();
 
+        [SettingSource("Source count", "amount of hit source")]
+        public BindableNumber<int> SourceCount { get; } = new BindableInt(3)
+        {
+            MinValue = 2,
+            MaxValue = 120,
+            Precision = 1,
+        };
+
+        [SettingSource("Flip", "Flip the sources vertically", SettingControlType = typeof(SettingsCheckbox))]
+        public Bindable<bool> Flip { get; } = new BindableBool(false);
+
         public void ApplyToBeatmap(IBeatmap beatmap)
         {
             var taikoBeatmap = (TaikoBeatmap)beatmap;
 
+            int sourceCount = SourceCount.Value;
+            bool flip = Flip.Value;
+            float offTrackCoefficient = 2f / (SourceCount.Value - SourceCount.Value % 2);
+
+            // Setup random number generator
             Seed.Value ??= RNG.Next();
             var rng = new Random((int)Seed.Value);
 
             foreach (var obj in taikoBeatmap.HitObjects)
             {
                 if (obj is Hit hit)
-                    hit.OffTrack = (rng.Next() % 3) - 1;
+                {
+                    // Select a lane index for the hit
+                    int sourceIndex = (rng.Next() % sourceCount) - sourceCount / 2;
+
+                    // Multiply with coefficient
+                    hit.OffTrack = sourceIndex * offTrackCoefficient * (flip ? -1 : 1);
+                }
             }
         }
     }

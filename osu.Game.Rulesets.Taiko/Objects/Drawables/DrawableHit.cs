@@ -40,7 +40,7 @@ namespace osu.Game.Rulesets.Taiko.Objects.Drawables
 
         private readonly Bindable<HitType> type = new Bindable<HitType>();
 
-        private int offTrack = 0;
+        private float offTrack = 0f;
 
         public DrawableHit()
             : this(null)
