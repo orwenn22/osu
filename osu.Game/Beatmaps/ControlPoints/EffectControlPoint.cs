@@ -13,7 +13,8 @@ namespace osu.Game.Beatmaps.ControlPoints
         public static readonly EffectControlPoint DEFAULT = new EffectControlPoint
         {
             KiaiModeBindable = { Disabled = true },
-            ScrollSpeedBindable = { Disabled = true }
+            ScrollSpeedBindable = { Disabled = true },
+            ScrollModeBindable = { Disabled = true }
         };
 
         /// <summary>
@@ -50,21 +51,38 @@ namespace osu.Game.Beatmaps.ControlPoints
             set => KiaiModeBindable.Value = value;
         }
 
+        /// <summary>
+        /// Scroll mode of the effect control point.
+        /// </summary>
+        public readonly Bindable<EffectControlPointScrollMode> ScrollModeBindable = new Bindable<EffectControlPointScrollMode>();
+
+        /// <summary>
+        /// Scroll mode of the effect control point.
+        /// </summary>
+        public EffectControlPointScrollMode ScrollMode
+        {
+            get => ScrollModeBindable.Value;
+            set => ScrollModeBindable.Value = value;
+        }
+
         public EffectControlPoint()
         {
             KiaiModeBindable.BindValueChanged(_ => RaiseChanged());
             ScrollSpeedBindable.BindValueChanged(_ => RaiseChanged());
+            ScrollModeBindable.BindValueChanged(_ => RaiseChanged());
         }
 
         public override bool IsRedundant(ControlPoint? existing)
             => existing is EffectControlPoint existingEffect
                && KiaiMode == existingEffect.KiaiMode
-               && ScrollSpeed == existingEffect.ScrollSpeed;
+               && ScrollSpeed == existingEffect.ScrollSpeed
+               && ScrollMode == existingEffect.ScrollMode;
 
         public override void CopyFrom(ControlPoint other)
         {
             KiaiMode = ((EffectControlPoint)other).KiaiMode;
             ScrollSpeed = ((EffectControlPoint)other).ScrollSpeed;
+            ScrollMode = ((EffectControlPoint)other).ScrollMode;
 
             base.CopyFrom(other);
         }
@@ -76,8 +94,15 @@ namespace osu.Game.Beatmaps.ControlPoints
         public bool Equals(EffectControlPoint? other)
             => base.Equals(other)
                && ScrollSpeed == other.ScrollSpeed
-               && KiaiMode == other.KiaiMode;
+               && KiaiMode == other.KiaiMode
+               && ScrollMode == other.ScrollMode;
 
-        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), ScrollSpeed, KiaiMode);
+        public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), ScrollSpeed, KiaiMode, ScrollMode);
+    }
+
+    public enum EffectControlPointScrollMode
+    {
+        Overlapping,
+        Sequential
     }
 }

@@ -240,6 +240,9 @@ namespace osu.Game.Beatmaps.Formats
                     effectFlags |= LegacyEffectFlags.Kiai;
                 if (timingPoint.OmitFirstBarLine)
                     effectFlags |= LegacyEffectFlags.OmitFirstBarLine;
+                if ((effectPoint.ScrollMode == EffectControlPointScrollMode.Sequential && onlineRulesetID == 1) //taiko
+                    || (effectPoint.ScrollMode == EffectControlPointScrollMode.Overlapping && onlineRulesetID == 3)) //mania
+                    effectFlags |= LegacyEffectFlags.AlternativeScrolling;
 
                 return new LegacyControlPointProperties
                 {

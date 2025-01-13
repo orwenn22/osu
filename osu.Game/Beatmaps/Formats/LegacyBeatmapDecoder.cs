@@ -508,12 +508,14 @@ namespace osu.Game.Beatmaps.Formats
 
             bool kiaiMode = false;
             bool omitFirstBarSignature = false;
+            bool alternativeScrolling = false;
 
             if (split.Length >= 8)
             {
                 LegacyEffectFlags effectFlags = (LegacyEffectFlags)Parsing.ParseInt(split[7]);
                 kiaiMode = effectFlags.HasFlag(LegacyEffectFlags.Kiai);
                 omitFirstBarSignature = effectFlags.HasFlag(LegacyEffectFlags.OmitFirstBarLine);
+                alternativeScrolling = effectFlags.HasFlag(LegacyEffectFlags.AlternativeScrolling);
             }
 
             string stringSampleSet = sampleSet.ToString().ToLowerInvariant();
@@ -545,6 +547,9 @@ namespace osu.Game.Beatmaps.Formats
             var effectPoint = new EffectControlPoint
             {
                 KiaiMode = kiaiMode,
+                ScrollMode = onlineRulesetID == 1 ? alternativeScrolling ? EffectControlPointScrollMode.Sequential : EffectControlPointScrollMode.Overlapping //taiko
+                    : onlineRulesetID == 3 ? alternativeScrolling ? EffectControlPointScrollMode.Overlapping : EffectControlPointScrollMode.Sequential //mania
+                    : EffectControlPointScrollMode.Overlapping, //other (it shouldn't mater which one is used, since it is unused)
             };
 
             // osu!taiko and osu!mania use effect points rather than difficulty points for scroll speed adjustments.

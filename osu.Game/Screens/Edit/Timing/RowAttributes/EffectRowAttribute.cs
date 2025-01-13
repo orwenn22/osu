@@ -12,10 +12,12 @@ namespace osu.Game.Screens.Edit.Timing.RowAttributes
     {
         private readonly Bindable<bool> kiaiMode;
         private readonly BindableNumber<double> scrollSpeed;
+        private readonly Bindable<EffectControlPointScrollMode> scrollMode;
 
         private AttributeText kiaiModeBubble = null!;
         private AttributeText text = null!;
         private AttributeProgressBar progressBar = null!;
+        private AttributeText scrollModeText = null!;
 
         [Resolved]
         protected EditorBeatmap Beatmap { get; private set; } = null!;
@@ -25,6 +27,7 @@ namespace osu.Game.Screens.Edit.Timing.RowAttributes
         {
             kiaiMode = effect.KiaiModeBindable.GetBoundCopy();
             scrollSpeed = effect.ScrollSpeedBindable.GetBoundCopy();
+            scrollMode = effect.ScrollModeBindable.GetBoundCopy();
         }
 
         [BackgroundDependencyLoader]
@@ -38,6 +41,7 @@ namespace osu.Game.Screens.Edit.Timing.RowAttributes
                 },
                 text = new AttributeText(Point) { Width = 45 },
                 kiaiModeBubble = new AttributeText(Point) { Text = "kiai" },
+                scrollModeText = new AttributeText(Point) { Text = "Overlapping" },
             });
 
             if (!Beatmap.BeatmapInfo.Ruleset.CreateInstance().EditorShowScrollSpeed)
@@ -48,8 +52,24 @@ namespace osu.Game.Screens.Edit.Timing.RowAttributes
 
             kiaiMode.BindValueChanged(enabled => kiaiModeBubble.FadeTo(enabled.NewValue ? 1 : 0), true);
             scrollSpeed.BindValueChanged(_ => updateText(), true);
+            scrollMode.BindValueChanged(_ => updateScrollModeText(), true);
         }
 
         private void updateText() => text.Text = $"{scrollSpeed.Value:n2}x";
+
+        private void updateScrollModeText()
+        {
+            if ((Beatmap.BeatmapInfo.Ruleset.OnlineID == 1 && scrollMode.Value == EffectControlPointScrollMode.Overlapping)
+                || (Beatmap.BeatmapInfo.Ruleset.OnlineID == 3 && scrollMode.Value == EffectControlPointScrollMode.Sequential)
+                || (Beatmap.BeatmapInfo.Ruleset.OnlineID != 1 && Beatmap.BeatmapInfo.Ruleset.OnlineID != 3))
+            {
+                scrollModeText.Hide();
+            }
+            else
+            {
+                scrollModeText.Text = scrollMode.Value.ToString();
+                scrollModeText.Show();
+            }
+        }
     }
 }

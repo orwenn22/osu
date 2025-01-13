@@ -6,6 +6,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays.Settings;
 
 namespace osu.Game.Screens.Edit.Timing
 {
@@ -15,12 +16,19 @@ namespace osu.Game.Screens.Edit.Timing
 
         private SliderWithTextBoxInput<double> scrollSpeedSlider = null!;
 
+        private SettingsEnumDropdown<EffectControlPointScrollMode> scrollModeDropdown = null!;
+
         [BackgroundDependencyLoader]
         private void load()
         {
             Flow.AddRange(new Drawable[]
             {
                 kiai = new LabelledSwitchButton { Label = "Kiai Time" },
+                scrollModeDropdown = new SettingsEnumDropdown<EffectControlPointScrollMode>
+                {
+                    TooltipText = "Scroll mode",
+                    Current = new EffectControlPoint().ScrollModeBindable,
+                },
                 scrollSpeedSlider = new SliderWithTextBoxInput<double>("Scroll Speed")
                 {
                     Current = new EffectControlPoint().ScrollSpeedBindable,
@@ -35,6 +43,7 @@ namespace osu.Game.Screens.Edit.Timing
 
             kiai.Current.BindValueChanged(_ => saveChanges());
             scrollSpeedSlider.Current.BindValueChanged(_ => saveChanges());
+            scrollModeDropdown.Current.BindValueChanged(_ => saveChanges());
 
             if (!Beatmap.BeatmapInfo.Ruleset.CreateInstance().EditorShowScrollSpeed)
                 scrollSpeedSlider.Hide();
@@ -69,6 +78,8 @@ namespace osu.Game.Screens.Edit.Timing
                 // whenever that stops being the case, or there is a possibility that the scroll speed could be changed
                 // by something else other than this control, this code should probably be revisited to have a binding in the other direction, too.
 
+                scrollModeDropdown.Current = newEffectPoint.ScrollModeBindable;
+
                 isRebinding = false;
             }
         }
@@ -89,6 +100,7 @@ namespace osu.Game.Screens.Edit.Timing
             {
                 KiaiMode = reference.KiaiMode,
                 ScrollSpeed = reference.ScrollSpeed,
+                ScrollMode = reference.ScrollMode,
             };
         }
     }

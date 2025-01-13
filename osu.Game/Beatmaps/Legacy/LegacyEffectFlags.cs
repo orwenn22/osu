@@ -10,6 +10,7 @@ namespace osu.Game.Beatmaps.Legacy
     {
         None = 0,
         Kiai = 1,
-        OmitFirstBarLine = 8
+        OmitFirstBarLine = 8,
+        AlternativeScrolling = 16 //if this bit is set : for taiko it enables sequential scrolling, for mania it enables overlapping scrolling
     }
 }

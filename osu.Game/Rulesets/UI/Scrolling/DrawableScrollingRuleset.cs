@@ -185,6 +185,10 @@ namespace osu.Game.Rulesets.UI.Scrolling
                     scrollingInfo.Algorithm.Value = new OverlappingScrollAlgorithm(ControlPoints);
                     break;
 
+                case ScrollVisualisationMethod.Hybrid:
+                    scrollingInfo.Algorithm.Value = new HybridScrollAlgorithm(ControlPoints);
+                    break;
+
                 case ScrollVisualisationMethod.Constant:
                     scrollingInfo.Algorithm.Value = new ConstantScrollAlgorithm();
                     break;
