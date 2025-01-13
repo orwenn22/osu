@@ -20,7 +20,12 @@ namespace osu.Game.Rulesets.Taiko.Mods
         public override LocalisableString Description => "(only works with compatible maps)";
         public override ModType Type => ModType.Fun;
         public override bool Ranked => false;
-        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(TaikoModConstantSpeed) }).ToArray();
+
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[]
+        {
+            typeof(TaikoModConstantSpeed),
+            typeof(TaikoModSequential)
+        }).ToArray();
 
         public void ApplyToDrawableRuleset(DrawableRuleset<TaikoHitObject> drawableRuleset)
         {

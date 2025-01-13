@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Mania.Objects;
@@ -13,30 +12,30 @@ using osu.Game.Rulesets.UI;
 
 namespace osu.Game.Rulesets.Mania.Mods
 {
-    public class ManiaModConstantSpeed : Mod, IApplicableToDrawableRuleset<ManiaHitObject>
+    public class ManiaModOverlapping : Mod, IApplicableToDrawableRuleset<ManiaHitObject>
     {
-        public override string Name => "Constant Speed";
+        public override string Name => "Overlapping";
 
-        public override string Acronym => "CS";
+        public override string Acronym => "OL";
 
-        public override double ScoreMultiplier => 0.9;
+        public override double ScoreMultiplier => 1.0;
 
-        public override LocalisableString Description => "No more tricky speed changes!";
+        public override bool Ranked => false;
 
-        public override IconUsage? Icon => FontAwesome.Solid.Equals;
+        public override LocalisableString Description => "Taiko SVs, but in mania";
 
-        public override ModType Type => ModType.Conversion;
+        public override ModType Type => ModType.Fun;
 
         public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[]
         {
-            typeof(ManiaModHybridScrolling),
-            typeof(ManiaModOverlapping)
+            typeof(ManiaModConstantSpeed),
+            typeof(ManiaModHybridScrolling)
         }).ToArray();
 
         public void ApplyToDrawableRuleset(DrawableRuleset<ManiaHitObject> drawableRuleset)
         {
             var maniaRuleset = (DrawableManiaRuleset)drawableRuleset;
-            maniaRuleset.VisualisationMethod = ScrollVisualisationMethod.Constant;
+            maniaRuleset.VisualisationMethod = ScrollVisualisationMethod.Overlapping;
         }
     }
 }

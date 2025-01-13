@@ -26,7 +26,11 @@ namespace osu.Game.Rulesets.Mania.Mods
 
         public override bool Ranked => false;
 
-        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(ManiaModConstantSpeed) }).ToArray();
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[]
+        {
+            typeof(ManiaModConstantSpeed),
+            typeof(ManiaModOverlapping)
+        }).ToArray();
 
         public void ApplyToDrawableRuleset(DrawableRuleset<ManiaHitObject> drawableRuleset)
         {

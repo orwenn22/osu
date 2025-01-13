@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Lists;
@@ -13,14 +14,16 @@ namespace osu.Game.Rulesets.UI.Scrolling.Algorithms
     {
         private readonly SortedList<MultiplierControlPoint> controlPoints;
 
-        private readonly OverlappingScrollAlgorithm overlappingAlgorithm;
-        private readonly SequentialScrollAlgorithm sequentialAlgorithm;
+        private readonly IScrollAlgorithm overlappingAlgorithm;
+        private readonly IScrollAlgorithm sequentialAlgorithm;
 
         public HybridScrollAlgorithm(SortedList<MultiplierControlPoint> controlPoints)
         {
+            Console.WriteLine("Made HybridScrollAlgorithm");
             this.controlPoints = controlPoints;
             overlappingAlgorithm = new OverlappingScrollAlgorithm(controlPoints);
             sequentialAlgorithm = new SequentialScrollAlgorithm(controlPoints);
+            //sequentialAlgorithm = new SequentialScrollAlgorithm(controlPoints);
         }
 
         public double GetDisplayStartTime(double originTime, float offset, double timeRange, float scrollLength)
