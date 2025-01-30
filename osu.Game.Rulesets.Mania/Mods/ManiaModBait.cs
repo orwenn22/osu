@@ -34,7 +34,7 @@ namespace osu.Game.Rulesets.Mania.Mods
 
         public void ApplyToBeatmap(IBeatmap beatmap)
         {
-            var maniaBeatmap = (ManiaBeatmap)beatmap
+            var maniaBeatmap = (ManiaBeatmap)beatmap;
 
             Seed.Value ??= RNG.Next();
             var rng = new Random((int)Seed.Value);
