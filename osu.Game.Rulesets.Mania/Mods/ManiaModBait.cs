@@ -41,7 +41,7 @@ namespace osu.Game.Rulesets.Mania.Mods
 
             foreach (var n in beatmap.HitObjects.OfType<Note>())
             {
-                n.ColumnOffset = rng.Next(-1, 1);
+                n.ColumnOffset = rng.Next(-1, 2);
 
                 int offsetedColumn = n.Column + n.ColumnOffset;
 

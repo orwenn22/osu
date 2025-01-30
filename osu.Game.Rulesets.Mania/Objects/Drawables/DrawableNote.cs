@@ -79,6 +79,7 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
             updateSnapColour();
             columnOffset = HitObject.ColumnOffset;
             offsetCorrected = true; // the drawable is correctly placed by default
+            X = columnOffset * DrawSize.X;
         }
 
         protected override void Update()
@@ -87,7 +88,7 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
 
             if (columnOffset == 0) return; // we don't need to do all the stuff below if the note isn't offset-ed
 
-            const int bait_point = 00;
+            const int bait_point = 500;
 
             // (down-scroll) || (up-scroll)
             if ((Anchor == Anchor.BottomCentre && Y > -bait_point) || (Anchor == Anchor.TopCentre && Y > bait_point)) //at this point the note should stop being offset-ed
