@@ -38,6 +38,10 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
 
         private Drawable headPiece;
 
+        private int columnOffset = 0;
+
+        private bool offsetCorrected = false;
+
         public DrawableNote()
             : this(null)
         {
@@ -73,6 +77,36 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
         {
             base.OnApply();
             updateSnapColour();
+            columnOffset = HitObject.ColumnOffset;
+            offsetCorrected = true; // the drawable is correctly placed by default
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (columnOffset == 0) return; // we don't need to do all the stuff below if the note isn't offset-ed
+
+            const int bait_point = 00;
+
+            // (down-scroll) || (up-scroll)
+            if ((Anchor == Anchor.BottomCentre && Y > -bait_point) || (Anchor == Anchor.TopCentre && Y > bait_point)) //at this point the note should stop being offset-ed
+            {
+                if (!offsetCorrected)
+                {
+                    this.MoveToX(0, 100, Easing.OutQuint);
+                    offsetCorrected = true;
+                }
+            }
+            else //here the note should be offset-ed
+            {
+                if (offsetCorrected)
+                {
+                    //X = columnOffset * DrawSize.X;
+                    this.MoveToX(columnOffset * DrawSize.X, 100, Easing.InQuint);
+                    offsetCorrected = false;
+                }
+            }
         }
 
         protected override void OnDirectionChanged(ValueChangedEvent<ScrollingDirection> e)

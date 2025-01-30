@@ -12,5 +12,7 @@ namespace osu.Game.Rulesets.Mania.Objects
     public class Note : ManiaHitObject
     {
         public override Judgement CreateJudgement() => new ManiaJudgement();
+
+        public int ColumnOffset = 0;
     }
 }
