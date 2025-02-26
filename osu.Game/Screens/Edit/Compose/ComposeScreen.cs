@@ -80,6 +80,13 @@ namespace osu.Game.Screens.Edit.Compose
                 Height = 0.75f,
             };
 
+            TimelineEffectDisplay effectDisplay = new TimelineEffectDisplay
+            {
+                RelativeSizeAxes = Axes.Both,
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+            };
+
             return wrapSkinnableContent(new Container
             {
                 RelativeSizeAxes = Axes.Both,
@@ -88,8 +95,10 @@ namespace osu.Game.Screens.Edit.Compose
                     // We want to display this below hitobjects to better expose placement objects visually.
                     // It needs to be above the blueprint container to handle drags on breaks though.
                     breakDisplay.CreateProxy(),
+                    effectDisplay.CreateProxy(),
                     new TimelineBlueprintContainer(composer),
-                    breakDisplay
+                    effectDisplay,
+                    breakDisplay,
                 }
             });
         }
