@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -40,10 +39,7 @@ namespace osu.Game.Screens.OnlinePlay.Match
 
         public override bool? ApplyModTrackAdjustments => true;
 
-        protected override BackgroundScreen CreateBackground() => new RoomBackgroundScreen(Room.Playlist.FirstOrDefault())
-        {
-            SelectedItem = { BindTarget = SelectedItem }
-        };
+        protected override BackgroundScreen CreateBackground() => new MultiplayerRoomBackgroundScreen();
 
         public override bool DisallowExternalBeatmapRulesetChanges => true;
 
@@ -95,13 +91,12 @@ namespace osu.Game.Screens.OnlinePlay.Match
         [Resolved(canBeNull: true)]
         protected IDialogOverlay? DialogOverlay { get; private set; }
 
-        [Cached]
-        private readonly OnlinePlayBeatmapAvailabilityTracker beatmapAvailabilityTracker = new OnlinePlayBeatmapAvailabilityTracker();
+        [Cached(typeof(OnlinePlayBeatmapAvailabilityTracker))]
+        private readonly MultiplayerBeatmapAvailabilityTracker beatmapAvailabilityTracker = new MultiplayerBeatmapAvailabilityTracker();
 
         protected IBindable<BeatmapAvailability> BeatmapAvailability => beatmapAvailabilityTracker.Availability;
 
         public readonly Room Room;
-        private readonly bool allowEdit;
 
         internal ModSelectOverlay UserModsSelectOverlay { get; private set; } = null!;
 
@@ -113,12 +108,9 @@ namespace osu.Game.Screens.OnlinePlay.Match
         /// Creates a new <see cref="RoomSubScreen"/>.
         /// </summary>
         /// <param name="room">The <see cref="Room"/>.</param>
-        /// <param name="allowEdit">Whether to allow editing room settings post-creation.</param>
-        protected RoomSubScreen(Room room, bool allowEdit = true)
+        protected RoomSubScreen(Room room)
         {
             Room = room;
-            this.allowEdit = allowEdit;
-
             Padding = new MarginPadding { Top = Header.HEIGHT };
         }
 
@@ -173,10 +165,9 @@ namespace osu.Game.Screens.OnlinePlay.Match
                                                     {
                                                         RelativeSizeAxes = Axes.X,
                                                         AutoSizeAxes = Axes.Y,
-                                                        Child = new DrawableMatchRoom(Room, allowEdit)
+                                                        Child = new MultiplayerRoomPanel(Room)
                                                         {
                                                             OnEdit = () => settingsOverlay.Show(),
-                                                            SelectedItem = SelectedItem
                                                         }
                                                     }
                                                 },
@@ -269,7 +260,6 @@ namespace osu.Game.Screens.OnlinePlay.Match
             SelectedItem.BindValueChanged(_ => updateSpecifics());
             UserMods.BindValueChanged(_ => updateSpecifics());
 
-            beatmapAvailabilityTracker.SelectedItem.BindTo(SelectedItem);
             beatmapAvailabilityTracker.Availability.BindValueChanged(_ => updateSpecifics());
 
             userModsSelectOverlayRegistration = overlayManager?.RegisterBlockingOverlay(UserModsSelectOverlay);
@@ -361,13 +351,20 @@ namespace osu.Game.Screens.OnlinePlay.Match
             if (!ensureExitConfirmed())
                 return true;
 
-            RoomManager?.PartRoom();
+            if (Room.RoomID != null)
+                PartRoom();
+
             Mods.Value = Array.Empty<Mod>();
 
             onLeaving();
 
             return base.OnExiting(e);
         }
+
+        /// <summary>
+        /// Parts from the current room.
+        /// </summary>
+        protected abstract void PartRoom();
 
         private bool ensureExitConfirmed()
         {
@@ -440,29 +437,25 @@ namespace osu.Game.Screens.OnlinePlay.Match
 
             var rulesetInstance = GetGameplayRuleset().CreateInstance();
 
+            Mod[] allowedMods = item.Freestyle
+                ? rulesetInstance.AllMods.OfType<Mod>().Where(m => ModUtils.IsValidFreeModForMatchType(m, Room.Type)).ToArray()
+                : item.AllowedMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
+
             // Remove any user mods that are no longer allowed.
-            Mod[] allowedMods = item.AllowedMods.Select(m => m.ToMod(rulesetInstance)).ToArray();
             Mod[] newUserMods = UserMods.Value.Where(m => allowedMods.Any(a => m.GetType() == a.GetType())).ToArray();
             if (!newUserMods.SequenceEqual(UserMods.Value))
-                UserMods.Value = UserMods.Value.Where(m => allowedMods.Any(a => m.GetType() == a.GetType())).ToList();
+                UserMods.Value = newUserMods;
 
             // Retrieve the corresponding local beatmap, since we can't directly use the playlist's beatmap info
             int beatmapId = GetGameplayBeatmap().OnlineID;
-            var localBeatmap = beatmapManager.QueryBeatmap(b => b.OnlineID == beatmapId);
+            var localBeatmap = beatmapManager.QueryBeatmap($@"{nameof(BeatmapInfo.OnlineID)} == $0 AND {nameof(BeatmapInfo.MD5Hash)} == {nameof(BeatmapInfo.OnlineMD5Hash)}", beatmapId);
             Beatmap.Value = beatmapManager.GetWorkingBeatmap(localBeatmap);
             UserModsSelectOverlay.Beatmap.Value = Beatmap.Value;
 
             Mods.Value = GetGameplayMods().Select(m => m.ToMod(rulesetInstance)).ToArray();
             Ruleset.Value = GetGameplayRuleset();
 
-            bool freeMod = item.AllowedMods.Any();
-            bool freestyle = item.Freestyle;
-
-            // For now, the game can never be in a state where freemod and freestyle are on at the same time.
-            // This will change, but due to the current implementation if this was to occur drawables will overlap so let's assert.
-            Debug.Assert(!freeMod || !freestyle);
-
-            if (freeMod)
+            if (allowedMods.Length > 0)
             {
                 UserModsSection.Show();
                 UserModsSelectOverlay.IsValidMod = m => allowedMods.Any(a => a.GetType() == m.GetType());
@@ -474,7 +467,7 @@ namespace osu.Game.Screens.OnlinePlay.Match
                 UserModsSelectOverlay.IsValidMod = _ => false;
             }
 
-            if (freestyle)
+            if (item.Freestyle)
             {
                 UserStyleSection.Show();
 
@@ -487,7 +480,7 @@ namespace osu.Game.Screens.OnlinePlay.Match
                 UserStyleDisplayContainer.Child = new DrawableRoomPlaylistItem(gameplayItem, true)
                 {
                     AllowReordering = false,
-                    AllowEditing = freestyle,
+                    AllowEditing = true,
                     RequestEdit = _ => OpenStyleSelection()
                 };
             }
