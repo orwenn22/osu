@@ -59,6 +59,23 @@ namespace osu.Game.Rulesets.Osu.UI
             return base.OnMouseMove(e);
         }
 
+        public void AddSegment()
+        {
+            if (currentSegmentSkinnable == null)
+            {
+                AddInternal(currentSegmentSkinnable = new SmokeSkinnableDrawable(new OsuSkinComponentLookup(OsuSkinComponents.CursorSmoke), _ => new DefaultSmokeSegment()));
+            }
+        }
+
+        public void EndSegment()
+        {
+            if (currentSegmentSkinnable?.Drawable is SmokeSegment segment)
+            {
+                segment.FinishDrawing(Time.Current);
+                currentSegmentSkinnable = null;
+            }
+        }
+
         private void addPosition() => (currentSegmentSkinnable?.Drawable as SmokeSegment)?.AddPosition(lastMousePosition, Time.Current);
 
         private partial class SmokeSkinnableDrawable : SkinnableDrawable
