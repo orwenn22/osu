@@ -64,6 +64,9 @@ namespace osu.Game.Rulesets.Catch.Scoring
                 case HitResult.SmallTickHit:
                     return 300;
 
+                case HitResult.Ok:
+                    return 150;
+
                 case HitResult.LargeBonus:
                     return 200;
             }
@@ -79,6 +82,10 @@ namespace osu.Game.Rulesets.Catch.Scoring
             {
                 case HitResult.Great:
                     baseIncrease = 300;
+                    break;
+
+                case HitResult.Ok:
+                    baseIncrease = 150;
                     break;
 
                 case HitResult.LargeTickHit:

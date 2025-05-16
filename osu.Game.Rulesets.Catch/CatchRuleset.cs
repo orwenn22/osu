@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -61,6 +62,8 @@ namespace osu.Game.Rulesets.Catch
             new KeyBinding(InputKey.Right, CatchAction.MoveRight),
             new KeyBinding(InputKey.Shift, CatchAction.Dash),
             new KeyBinding(InputKey.MouseLeft, CatchAction.Dash),
+            new KeyBinding(InputKey.D, CatchAction.HitFruit1),
+            new KeyBinding(InputKey.F, CatchAction.HitFruit2),
         };
 
         public override IEnumerable<Mod> ConvertFromLegacyMods(LegacyMods mods)
@@ -176,6 +179,7 @@ namespace osu.Game.Rulesets.Catch
             return new[]
             {
                 HitResult.Great,
+                HitResult.Ok,
 
                 HitResult.LargeTickHit,
                 HitResult.SmallTickHit,
@@ -254,6 +258,8 @@ namespace osu.Game.Rulesets.Catch
 
         public override StatisticItem[] CreateStatisticsForScore(ScoreInfo score, IBeatmap playableBeatmap)
         {
+            var timedHitEvents = score.HitEvents.Where(e => e.HitObject is Fruit).ToList();
+
             return new[]
             {
                 new StatisticItem("Performance Breakdown", () => new PerformanceBreakdownChart(score, playableBeatmap)
@@ -261,6 +267,11 @@ namespace osu.Game.Rulesets.Catch
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y
                 }),
+                new StatisticItem("Timing Distribution", () => new HitEventTimingDistributionGraph(timedHitEvents)
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = 250
+                }, true),
             };
         }
 

@@ -98,6 +98,7 @@ namespace osu.Game.Rulesets.Catch.Replays
                 if (obj is PalpableCatchHitObject palpableObject)
                 {
                     moveToNext(palpableObject);
+                    addFrame(lastTime, lastPosition, false, true, false);
                 }
 
                 foreach (var nestedObj in obj.NestedHitObjects.Cast<CatchHitObject>())
@@ -105,14 +106,15 @@ namespace osu.Game.Rulesets.Catch.Replays
                     if (nestedObj is PalpableCatchHitObject palpableNestedObject)
                     {
                         moveToNext(palpableNestedObject);
+                        addFrame(lastTime, lastPosition, false, true, false);
                     }
                 }
             }
         }
 
-        private void addFrame(double time, float? position = null, bool dashing = false)
+        private void addFrame(double time, float? position = null, bool dashing = false, bool hit1 = false, bool hit2 = false)
         {
-            Frames.Add(new CatchReplayFrame(time, position, dashing, LastFrame));
+            Frames.Add(new CatchReplayFrame(time, position, dashing, hit1, hit2, LastFrame));
         }
     }
 }

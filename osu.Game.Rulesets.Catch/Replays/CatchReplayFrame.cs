@@ -15,16 +15,20 @@ namespace osu.Game.Rulesets.Catch.Replays
 
         public float Position;
         public bool Dashing;
+        public bool Hit1;
+        public bool Hit2;
 
         public CatchReplayFrame()
         {
         }
 
-        public CatchReplayFrame(double time, float? position = null, bool dashing = false, CatchReplayFrame? lastFrame = null)
+        public CatchReplayFrame(double time, float? position = null, bool dashing = false, bool hit1 = false, bool hit2 = false, CatchReplayFrame? lastFrame = null)
             : base(time)
         {
             Position = position ?? -1;
             Dashing = dashing;
+            Hit1 = hit1;
+            Hit2 = hit2;
 
             if (Dashing)
                 Actions.Add(CatchAction.Dash);
@@ -35,13 +39,20 @@ namespace osu.Game.Rulesets.Catch.Replays
                     lastFrame.Actions.Add(CatchAction.MoveRight);
                 else if (Position < lastFrame.Position)
                     lastFrame.Actions.Add(CatchAction.MoveLeft);
+
+                if (Hit1)
+                    lastFrame.Actions.Add(CatchAction.HitFruit1);
+                if (Hit2)
+                    lastFrame.Actions.Add(CatchAction.HitFruit2);
             }
         }
 
         public void FromLegacy(LegacyReplayFrame currentFrame, IBeatmap beatmap, ReplayFrame? lastFrame = null)
         {
             Position = currentFrame.Position.X;
-            Dashing = currentFrame.ButtonState == ReplayButtonState.Left1;
+            Dashing = (currentFrame.ButtonState & ReplayButtonState.Left1) != 0;
+            Hit1 = (currentFrame.ButtonState & ReplayButtonState.Right1) != 0;
+            Hit2 = (currentFrame.ButtonState & ReplayButtonState.Left2) != 0;
 
             if (Dashing)
                 Actions.Add(CatchAction.Dash);
@@ -53,6 +64,11 @@ namespace osu.Game.Rulesets.Catch.Replays
                     lastCatchFrame.Actions.Add(CatchAction.MoveRight);
                 else if (Position < lastCatchFrame.Position)
                     lastCatchFrame.Actions.Add(CatchAction.MoveLeft);
+
+                if (Hit1)
+                    lastCatchFrame.Actions.Add(CatchAction.HitFruit1);
+                if (Hit2)
+                    lastCatchFrame.Actions.Add(CatchAction.HitFruit2);
             }
         }
 
@@ -61,6 +77,8 @@ namespace osu.Game.Rulesets.Catch.Replays
             ReplayButtonState state = ReplayButtonState.None;
 
             if (Actions.Contains(CatchAction.Dash)) state |= ReplayButtonState.Left1;
+            if (Actions.Contains(CatchAction.HitFruit1)) state |= ReplayButtonState.Right1;
+            if (Actions.Contains(CatchAction.HitFruit2)) state |= ReplayButtonState.Left2;
 
             return new LegacyReplayFrame(Time, Position, null, state);
         }

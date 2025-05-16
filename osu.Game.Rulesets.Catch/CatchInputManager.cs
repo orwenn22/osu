@@ -27,5 +27,11 @@ namespace osu.Game.Rulesets.Catch
 
         [Description("Engage dash")]
         Dash,
+
+        [Description("Hit fruit 1")]
+        HitFruit1,
+
+        [Description("Hit fruit 2")]
+        HitFruit2,
     }
 }

@@ -21,6 +21,6 @@ namespace osu.Game.Rulesets.Catch.UI
         }
 
         protected override ReplayFrame HandleFrame(Vector2 mousePosition, List<CatchAction> actions, ReplayFrame previousFrame)
-            => new CatchReplayFrame(Time.Current, playfield.Catcher.X, actions.Contains(CatchAction.Dash), previousFrame as CatchReplayFrame);
+            => new CatchReplayFrame(Time.Current, playfield.Catcher.X, actions.Contains(CatchAction.Dash), actions.Contains(CatchAction.HitFruit1), actions.Contains(CatchAction.HitFruit2), previousFrame as CatchReplayFrame);
     }
 }
